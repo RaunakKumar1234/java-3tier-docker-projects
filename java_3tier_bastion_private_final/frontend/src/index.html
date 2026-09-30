@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java 3-Tier CRUD</title>
+<style>
+body{font-family:Arial;margin:0;background:#f3f4f6;color:#111827}
+.container{max-width:900px;margin:40px auto;padding:20px}
+.card{background:white;padding:24px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 18px #0001}
+form{display:grid;grid-template-columns:1fr 180px 120px;gap:10px}
+input,button{padding:12px;border:1px solid #d1d5db;border-radius:7px}
+button{background:#111827;color:white;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;border-bottom:1px solid #ddd;text-align:left}
+.delete{background:#dc2626}
+@media(max-width:700px){form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<h1>Java 3-Tier Product CRUD</h1>
+<p>ALB → Frontend → Backend → Database</p>
+<form id="form">
+<input id="name" placeholder="Product name" required>
+<input id="price" type="number" min="0" step="0.01" placeholder="Price" required>
+<button>Add</button>
+</form>
+<p id="msg"></p>
+</div>
+<div class="card">
+<h2>Products</h2>
+<table>
+<thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Action</th></tr></thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+</div>
+<script>
+async function load(){
+ const r=await fetch('/api/products');
+ const data=await r.json();
+ document.getElementById('rows').innerHTML=data.map(p =>
+ `<tr><td>${p.id}</td><td>${escapeHtml(p.name)}</td><td>₹${Number(p.price).toFixed(2)}</td><td><button class="delete" onclick="del(${p.id})">Delete</button></td></tr>`
+ ).join('');
+}
+async function del(id){await fetch('/api/products/'+id,{method:'DELETE'});load();}
+document.getElementById('form').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const name=document.getElementById('name').value;
+ const price=Number(document.getElementById('price').value);
+ const r=await fetch('/api/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,price})});
+ document.getElementById('msg').textContent=r.ok?'Product added.':'Failed.';
+ e.target.reset(); load();
+});
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+load();
+</script>
+</body>
+</html>

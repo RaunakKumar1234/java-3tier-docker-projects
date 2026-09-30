@@ -1,0 +1,10 @@
+services:
+  database:
+    build: ./database
+    image: java3tier-database:latest
+  backend:
+    build: ./backend
+    image: java3tier-backend:latest
+  frontend:
+    build: ./frontend
+    image: java3tier-frontend:latest
